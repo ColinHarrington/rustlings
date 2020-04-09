@@ -10,7 +10,6 @@ struct Person {
     age: usize,
 }
 
-// I AM NOT DONE
 // Your task is to complete this implementation
 // in order for the line `let p = Person::try_from("Mark,20")` to compile
 // and return an Ok result of inner type Person.
@@ -28,6 +27,19 @@ struct Person {
 impl TryFrom<&str> for Person {
     type Error = String;
     fn try_from(s: &str) -> Result<Self, Self::Error> {
+        let parts = s.split(',').collect::<Vec<&str>>();
+        let mut iterator = parts.iter();
+
+        match iterator.next() {
+            None => Err(String::from("empty string")),
+            Some(name) => match iterator.next() {
+                None => Err(String::from("No Age")),
+                Some(a) => match a.parse::<usize>() {
+                    Ok(age) => Ok(Person { name:name.to_string(), age }),
+                    Err(e) => Err(format!("Age failed to parse {:?}",e)),
+                }
+            }
+        }
     }
 }
 
@@ -43,12 +55,14 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
     fn test_bad_convert() {
         // Test that John is returned when bad string is provided
         let p = Person::try_from("");
         assert!(p.is_err());
     }
+
     #[test]
     fn test_good_convert() {
         // Test that "Mark,20" works
@@ -58,11 +72,13 @@ mod tests {
         assert_eq!(p.name, "Mark");
         assert_eq!(p.age, 20);
     }
+
     #[test]
     #[should_panic]
     fn test_panic_empty_input() {
         let p: Person = "".try_into().unwrap();
     }
+
     #[test]
     #[should_panic]
     fn test_panic_bad_age() {

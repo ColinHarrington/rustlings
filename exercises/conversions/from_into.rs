@@ -18,7 +18,6 @@ impl Default for Person {
     }
 }
 
-// I AM NOT DONE
 // Your task is to complete this implementation
 // in order for the line `let p = Person::from("Mark,20")` to compile
 // Please note that you'll need to parse the age component into a `usize`
@@ -34,6 +33,23 @@ impl Default for Person {
 // Otherwise, then return an instantiated Person onject with the results
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        if s.len() == 0 { Person::default() } else {
+            let mut v = s.split(',').collect::<Vec<&str>>();
+            println!("Split: {:?}", v);
+            Person {
+                age: match v.pop() {
+                    None => Person::default().age,
+                    Some(a) => match a.parse::<usize>() {
+                        Ok(n) => n,
+                        Err(_) => Person::default().age,
+                    }
+                },
+                name: match v.pop() {
+                    None => Person::default().name,
+                    Some(n) => n.to_string(),
+                },
+            }
+        }
     }
 }
 
@@ -61,6 +77,21 @@ mod tests {
         // Test that John is returned when bad string is provided
         let p = Person::from("");
         assert_eq!(p.name, "John");
+        assert_eq!(p.age, 30);
+    }
+    #[test]
+    fn test_bad_convert1() {
+        // Test that John is returned when bad string is provided
+        let p = Person::from("McFly,fourty-to");
+        assert_eq!(p.name, "McFly");
+        assert_eq!(p.age, 30);
+    }
+
+    #[test]
+    fn test_bad_convert2() {
+        // Test that John is returned when bad string is provided
+        let p = Person::from("Kenny,");
+        assert_eq!(p.name, "Kenny");
         assert_eq!(p.age, 30);
     }
     #[test]
